@@ -5,6 +5,7 @@ const selectedFootage = ref('minecraft')
 const isGenerating = ref(false)
 const showQuotaModal = ref(false)
 const uploadedFile = ref<File | null>(null)
+const generatedVideoUrl = ref<string | null>(null)
 
 const footageOptions = [
   { id: 'minecraft', name: 'Minecraft Parkour', preview: 'https://placehold.co/400x225/1a1a1a/ffffff?text=Minecraft' },
@@ -31,14 +32,42 @@ const handleGenerate = async () => {
   }
 
   isGenerating.value = true
-  alert('Generation started! Please wait...')
+  generatedVideoUrl.value = null
   
-  // Simulate AI generation process
-  await new Promise(resolve => setTimeout(resolve, 3000))
-  
-  quotaManager.consumeQuota()
-  isGenerating.value = false
-  alert('Success! Your sludge video has been generated.')
+  try {
+    const formData = new FormData()
+    formData.append('video', uploadedFile.value)
+    formData.append('footage', selectedFootage.value)
+
+    const response = await fetch('/api/generate', {
+      method: 'POST',
+      body: formData
+    })
+
+    if (!response.ok) {
+      throw new Error('Failed to generate video')
+    }
+
+    const blob = await response.blob()
+    generatedVideoUrl.value = URL.createObjectURL(blob)
+    
+    quotaManager.consumeQuota()
+  } catch (error) {
+    console.error('Generation error:', error)
+    alert('Failed to generate video. Please try again.')
+  } finally {
+    isGenerating.value = false
+  }
+}
+
+const downloadVideo = () => {
+  if (!generatedVideoUrl.value) return
+  const a = document.createElement('a')
+  a.href = generatedVideoUrl.value
+  a.download = 'sludge-video.mp4'
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
 }
 </script>
 
@@ -116,7 +145,7 @@ const handleGenerate = async () => {
       </div>
 
       <!-- Generate Button -->
-      <div class="mt-16 flex justify-center">
+      <div class="mt-16 flex flex-col items-center gap-8">
         <button 
           @click="handleGenerate"
           :disabled="isGenerating"
@@ -131,6 +160,22 @@ const handleGenerate = async () => {
           </span>
           <span v-else>GENERATE SLUDGE</span>
         </button>
+
+        <!-- Result Preview -->
+        <div v-if="generatedVideoUrl" class="w-full max-w-2xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div class="relative aspect-[9/16] max-h-[600px] mx-auto rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
+            <video :src="generatedVideoUrl" controls class="w-full h-full object-cover"></video>
+          </div>
+          <button 
+            @click="downloadVideo"
+            class="w-full py-5 bg-white text-black font-black text-xl rounded-2xl hover:bg-gray-200 transition-all active:scale-95 flex items-center justify-center gap-3"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            DOWNLOAD SLUDGE
+          </button>
+        </div>
       </div>
     </main>
 
