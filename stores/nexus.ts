@@ -1,11 +1,19 @@
 import { defineStore } from 'pinia'
 
+export interface SuggestedTool {
+  id: string
+  name: string
+  description: string
+  icon: string
+}
+
 export const useNexusStore = defineStore('nexus', {
   state: () => ({
     isLauncherOpen: false,
     currentContext: null as string | null,
     workspaceData: [] as any[],
-    isAnalyzing: false
+    isAnalyzing: false,
+    suggestedTool: null as SuggestedTool | null
   }),
   actions: {
     toggleLauncher() {
@@ -16,6 +24,9 @@ export const useNexusStore = defineStore('nexus', {
     },
     setAnalyzing(status: boolean) {
       this.isAnalyzing = status
+    },
+    setSuggestedTool(tool: SuggestedTool | null) {
+      this.suggestedTool = tool
     }
   }
 })
