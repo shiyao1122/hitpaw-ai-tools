@@ -15,17 +15,23 @@ const footageOptions = [
 const handleFileUpload = (event: Event) => {
   const target = event.target as HTMLInputElement
   if (target.files && target.files[0]) {
-    uploadedFile.ref = target.files[0]
+    uploadedFile.value = target.files[0]
   }
 }
 
 const handleGenerate = async () => {
+  if (!uploadedFile.value) {
+    alert('Please upload a video first!')
+    return
+  }
+
   if (!quotaManager.canConsume()) {
     showQuotaModal.value = true
     return
   }
 
   isGenerating.value = true
+  alert('Generation started! Please wait...')
   
   // Simulate AI generation process
   await new Promise(resolve => setTimeout(resolve, 3000))
