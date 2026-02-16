@@ -57,11 +57,25 @@ const launchTool = (toolId: string) => {
 
         <div class="space-y-4">
           <!-- Context Display -->
-          <div class="p-4 rounded-xl bg-white/5 border border-white/10">
-            <p class="text-xs text-white/50 uppercase tracking-wider mb-1">Clipboard Content</p>
-            <p class="text-sm text-white font-medium truncate">
-              {{ nexusStore.isAnalyzing ? 'Analyzing...' : (nexusStore.currentContext || 'No context detected') }}
+          <div 
+            @click="analyzeClipboard"
+            class="p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 cursor-pointer transition-colors"
+          >
+            <div class="flex justify-between items-center mb-1">
+              <p class="text-xs text-white/50 uppercase tracking-wider">Clipboard Content</p>
+              <span v-if="nexusStore.isAnalyzing" class="flex h-2 w-2 rounded-full bg-blue-500 animate-pulse"></span>
+            </div>
+            <p class="text-sm text-white font-medium truncate mb-2">
+              {{ nexusStore.isAnalyzing ? 'Analyzing...' : (nexusStore.currentContext || 'Listening for context...') }}
             </p>
+            <button 
+              class="w-full py-1.5 bg-white/10 hover:bg-white/20 text-white text-[10px] uppercase tracking-widest font-bold rounded flex items-center justify-center gap-2 transition-all"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              Manual Scan
+            </button>
           </div>
 
           <!-- Suggested Tool Card -->

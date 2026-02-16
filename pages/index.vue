@@ -13,7 +13,21 @@
           Intelligent clipboard analysis and tool orchestration for the next generation of AI-powered media creation.
         </p>
         
-        <NexusLauncher />
+        <div class="flex flex-col items-center gap-6">
+          <NexusLauncher />
+          
+          <NuxtLink 
+            to="/sludge-generator" 
+            class="group relative px-8 py-4 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 rounded-2xl transition-all duration-300"
+          >
+            <div class="flex items-center gap-3">
+              <span class="text-purple-400 font-bold tracking-wide">TRY SLUDGE GENERATOR</span>
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-purple-400 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </div>
+          </NuxtLink>
+        </div>
       </div>
     </div>
   </div>

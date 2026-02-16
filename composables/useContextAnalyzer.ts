@@ -15,6 +15,36 @@ export const useContextAnalyzer = () => {
       name: 'Photo Enhancer',
       description: 'Enlarge images without losing detail.',
       icon: 'image'
+    },
+    'watermark': {
+      id: 'watermark-remover',
+      name: 'Watermark Remover',
+      description: 'Remove unwanted objects or text from media.',
+      icon: 'image'
+    },
+    'background': {
+      id: 'bg-remover',
+      name: 'Background Remover',
+      description: 'Automatically remove image backgrounds.',
+      icon: 'image'
+    },
+    'photo': {
+      id: 'photo-enhancer',
+      name: 'Photo Enhancer',
+      description: 'Enhance and repair your photos.',
+      icon: 'image'
+    },
+    'image': {
+      id: 'photo-enhancer',
+      name: 'Photo Enhancer',
+      description: 'Enhance and repair your photos.',
+      icon: 'image'
+    },
+    'blur': {
+      id: 'photo-enhancer',
+      name: 'Photo Enhancer',
+      description: 'Fix blurry images and improve clarity.',
+      icon: 'image'
     }
   }
 
@@ -25,6 +55,7 @@ export const useContextAnalyzer = () => {
     try {
       // Logic: Use browser navigator.clipboard.readText() API
       const text = await navigator.clipboard.readText()
+      console.log('Successfully read clipboard context:', text)
       nexusStore.setContext(text)
 
       // Keywords: Map keywords to tool IDs
