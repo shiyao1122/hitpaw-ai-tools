@@ -1,0 +1,147 @@
+<template>
+  <div class="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4 selection:bg-purple-500/30">
+    <div class="w-full max-w-4xl backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+      <!-- Cosmic Background Glow -->
+      <div class="absolute -top-24 -left-24 w-64 h-64 bg-purple-600/20 rounded-full blur-3xl animate-pulse"></div>
+      <div class="absolute -bottom-24 -right-24 w-64 h-64 bg-blue-600/20 rounded-full blur-3xl animate-pulse"></div>
+      
+      <div class="relative z-10 text-center">
+        <div class="inline-block px-4 py-1.5 mb-6 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-bold uppercase tracking-widest">
+          AI Cosmic Oracle
+        </div>
+        
+        <h1 class="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-br from-white via-purple-200 to-indigo-400 mb-6 tracking-tight">
+          Don't Just Read Your Future.<br/>
+          <span class="text-white drop-shadow-[0_0_15px_rgba(168,85,247,0.5)] uppercase italic">See It.</span>
+        </h1>
+        
+        <p class="text-slate-400 text-xl max-w-2xl mx-auto mb-12 font-medium leading-relaxed">
+          The world's first AI tool that turns your birth chart into a masterpiece. From Leo's fire to Scorpio's mystery, visualize your cosmic identity with HitPaw AI.
+        </p>
+
+        <!-- Interactive Birthday Input -->
+        <div class="max-w-md mx-auto bg-white/5 border border-white/10 rounded-2xl p-6 mb-12 group transition-all hover:bg-white/10">
+          <label class="block text-slate-400 text-sm font-bold uppercase mb-4 text-left">Your Birth Date</label>
+          <div class="flex gap-4">
+            <input 
+              v-model="birthDate"
+              type="date" 
+              class="flex-1 bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
+            />
+            <button 
+              @click="generateArt"
+              :disabled="loading"
+              class="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold rounded-xl transition-all active:scale-95 whitespace-nowrap shadow-lg shadow-purple-500/20 disabled:opacity-50"
+            >
+              <span v-if="!loading">Generate Art</span>
+              <span v-else class="flex items-center gap-2">
+                <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                Creating...
+              </span>
+            </button>
+          </div>
+          
+          <!-- Result Area -->
+          <div v-if="resultImage" class="mt-8 rounded-2xl overflow-hidden border border-white/10 shadow-2xl animate-in fade-in zoom-in duration-500">
+            <img :src="resultImage" class="w-full h-auto" alt="AI Generated Destiny" />
+            <div class="p-4 bg-white/5 backdrop-blur-md flex justify-between items-center">
+              <span class="text-xs text-slate-400 uppercase font-bold tracking-widest">Your 2029 Vision Ready</span>
+              <button @click="shareArt" class="text-purple-400 text-xs font-bold hover:underline">SHARE & DOWNLOAD</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Features Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+          <div class="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-purple-500/30 transition-all">
+            <div class="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h3 class="text-white font-bold mb-2">Birth Chart Art</h3>
+            <p class="text-slate-400 text-sm">Blend your astrological placements into a unique digital avatar.</p>
+          </div>
+
+          <div class="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-blue-500/30 transition-all">
+            <div class="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+            </div>
+            <h3 class="text-white font-bold mb-2">AI Tarot Cards</h3>
+            <p class="text-slate-400 text-sm">Pick a card and let AI draw your reading in real-time. No repeats.</p>
+          </div>
+
+          <div class="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-indigo-500/30 transition-all">
+            <div class="w-10 h-10 bg-indigo-500/20 rounded-lg flex items-center justify-center mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h3 class="text-white font-bold mb-2">Video Horoscope</h3>
+            <p class="text-slate-400 text-sm">Transform your reading into a cinematic cinematic 15s video for social media.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- SEO Footer Content -->
+    <div class="max-w-4xl w-full mt-12 grid grid-cols-1 md:grid-cols-2 gap-8 px-4 opacity-50 hover:opacity-100 transition-opacity">
+      <div>
+        <h4 class="text-white font-bold mb-2">About HitPaw AI Astrology</h4>
+        <p class="text-slate-400 text-xs leading-relaxed">
+          HitPaw is pioneering the intersection of spiritual intelligence and generative AI. Our Birth Chart Art Generator uses proprietary prompt engineering based on Sun, Moon, and Rising sign data to create one-of-a-kind digital assets. Whether you're a 1992 Leo with a Capricorn Moon or a 2005 Gen Z mystic, our platform visualizes your cosmic destiny in ultra-high resolution.
+        </p>
+      </div>
+      <div>
+        <h4 class="text-white font-bold mb-2">Top AI Mystic Keywords</h4>
+        <div class="flex flex-wrap gap-2">
+          <span class="text-slate-500 text-[10px] px-2 py-0.5 border border-white/5 rounded italic">#AIastrology</span>
+          <span class="text-slate-500 text-[10px] px-2 py-0.5 border border-white/5 rounded italic">#AItarotArt</span>
+          <span class="text-slate-500 text-[10px] px-2 py-0.5 border border-white/5 rounded italic">#BirthChartVisualization</span>
+          <span class="text-slate-500 text-[10px] px-2 py-0.5 border border-white/5 rounded italic">#HitPawAI</span>
+          <span class="text-slate-500 text-[10px] px-2 py-0.5 border border-white/5 rounded italic">#2026HoroscopeArt</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+const birthDate = ref('')
+const loading = ref(false)
+const resultImage = ref('')
+
+const generateArt = async () => {
+  if (!birthDate.value) return
+  loading.value = true
+  try {
+    // 闭环调用：通过后台 Python API 路由到 Replicate
+    const response = await fetch('/api/oracle', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ birthDate: birthDate.value })
+    })
+    const data = await response.json()
+    if (data.url) resultImage.value = data.url
+  } catch (e) {
+    console.error('Generation failed', e)
+  } finally {
+    loading.value = false
+  }
+}
+
+const shareArt = () => {
+  window.open(resultImage.value, '_blank')
+}
+
+useHead({
+  title: 'AI Astrology & Tarot Art Generator | Visualize Your Destiny | HitPaw AI',
+  meta: [
+    { name: 'description', content: 'Transform your birth chart and tarot readings into stunning AI-generated art. Experience the first visual-first AI astrology tool on HitPaw.ai.' },
+    { property: 'og:title', content: 'AI Astrology & Tarot Art Generator | HitPaw AI' },
+    { property: 'og:image', content: 'https://www.hitpaw.ai/og-astrology.jpg' }
+  ]
+})
+</script>
