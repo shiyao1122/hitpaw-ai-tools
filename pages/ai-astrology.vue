@@ -42,11 +42,18 @@
           </div>
           
           <!-- Result Area -->
-          <div v-if="resultImage" class="mt-8 rounded-2xl overflow-hidden border border-white/10 shadow-2xl animate-in fade-in zoom-in duration-500">
+          <div v-if="resultImage" class="mt-8 rounded-2xl overflow-hidden border border-white/10 shadow-2xl animate-in fade-in zoom-in duration-500 text-left">
             <img :src="resultImage" class="w-full h-auto" alt="AI Generated Destiny" />
-            <div class="p-4 bg-white/5 backdrop-blur-md flex justify-between items-center">
+            <div class="p-4 bg-white/5 backdrop-blur-md flex justify-between items-center border-b border-white/10">
               <span class="text-xs text-slate-400 uppercase font-bold tracking-widest">Your 2029 Vision Ready</span>
               <button @click="shareArt" class="text-purple-400 text-xs font-bold hover:underline">SHARE & DOWNLOAD</button>
+            </div>
+            <!-- Fortune Report Section -->
+            <div v-if="fortuneReport" class="p-8 bg-slate-900/50 backdrop-blur-sm prose prose-invert max-w-none">
+              <h2 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-400 mb-6">2026 Cosmic Fortune Report</h2>
+              <div class="text-slate-300 whitespace-pre-wrap leading-relaxed">
+                {{ fortuneReport }}
+              </div>
             </div>
           </div>
         </div>
@@ -112,12 +119,15 @@
 const birthDate = ref('')
 const loading = ref(false)
 const resultImage = ref('')
+const fortuneReport = ref('')
 
 const generateArt = async () => {
   if (!birthDate.value) return
   loading.value = true
+  resultImage.value = ''
+  fortuneReport.value = ''
   try {
-    // 闭环调用：通过后台 Python API 路由到 Replicate
+    // 闭环调用：通过后台 Nuxt API 路由到 Replicate & OpenAI
     const response = await fetch('/api/oracle', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -125,6 +135,7 @@ const generateArt = async () => {
     })
     const data = await response.json()
     if (data.url) resultImage.value = data.url
+    if (data.fortuneReport) fortuneReport.value = data.fortuneReport
   } catch (e) {
     console.error('Generation failed', e)
   } finally {

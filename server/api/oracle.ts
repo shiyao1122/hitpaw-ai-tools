@@ -35,16 +35,26 @@ export default defineEventHandler(async (event) => {
 
   // 3. 直接在 Server API 中调用 Replicate (Cloud Execution)
   const REPLICATE_API_TOKEN = process.env.REPLICATE_API_TOKEN
+  const OPENAI_API_KEY = process.env.OPENAI_API_KEY
   
   if (!REPLICATE_API_TOKEN) {
     throw createError({
       statusCode: 500,
-      statusMessage: 'Server configuration error: Missing API Token',
+      statusMessage: 'Server configuration error: Missing Replicate API Token',
+    })
+  }
+
+  if (!OPENAI_API_KEY) {
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'Server configuration error: Missing OpenAI API Key',
     })
   }
   
   try {
     let output;
+    let fortuneReport = '';
+
     if (type === 'image') {
       const response = await fetch("https://api.replicate.com/v1/models/prunaai/z-image-turbo/predictions", {
         method: "POST",
@@ -72,9 +82,37 @@ export default defineEventHandler(async (event) => {
       // 修复：确保正确处理数组或字符串输出，避免返回首字母 "h"
       const finalOutput = result.output;
       output = Array.isArray(finalOutput) ? finalOutput[0] : finalOutput;
+
+      // 4. Generate 2026 Fortune Report using OpenAI
+      const openaiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${OPENAI_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "system",
+              content: "You are a professional astrologer. Provide a detailed 2026 fortune report based on the user's zodiac sign. The report should be approximately 300 words, insightful, and formatted with clear headings for Love, Career, and Wellness."
+            },
+            {
+              role: "user",
+              content: `Generate a 2026 fortune report for the zodiac sign: ${zodiac}.`
+            }
+          ],
+          max_tokens: 1000,
+        }),
+      });
+
+      const openaiData = await openaiResponse.json();
+      if (openaiData.choices && openaiData.choices.length > 0) {
+        fortuneReport = openaiData.choices[0].message.content;
+      }
     }
 
-    return { url: output }
+    return { url: output, fortuneReport }
   } catch (error: any) {
     console.error('Replicate call failed:', error)
     throw createError({
