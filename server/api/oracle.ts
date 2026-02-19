@@ -112,7 +112,7 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-    return { url: output, fortuneReport }
+    return { url: output, fortuneReport, zodiac }
   } catch (error: any) {
     console.error('Replicate call failed:', error)
     throw createError({
