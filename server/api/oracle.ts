@@ -68,7 +68,10 @@ export default defineEventHandler(async (event) => {
       }
       
       if (result.status === "failed") throw new Error("Image generation failed");
-      output = result.output[0] || result.output;
+      
+      // 修复：确保正确处理数组或字符串输出，避免返回首字母 "h"
+      const finalOutput = result.output;
+      output = Array.isArray(finalOutput) ? finalOutput[0] : finalOutput;
     }
 
     return { url: output }
