@@ -1,4 +1,4 @@
-import { defineEventHandler, readBody } from 'h3'
+import { defineEventHandler, readBody, createError } from 'h3'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
@@ -11,8 +11,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Basic logic to derive a prompt from birth date
-  // In a real app, this would involve more complex astrology calculations
+  // 1. 根据生日计算星座 (Cloud Logic)
   const dateObj = new Date(birthDate)
   const month = dateObj.getMonth() + 1
   const day = dateObj.getDate()
@@ -31,24 +30,53 @@ export default defineEventHandler(async (event) => {
   else if ((month == 11 && day >= 22) || (month == 12 && day <= 21)) zodiac = 'Sagittarius'
   else zodiac = 'Capricorn'
 
-  const prompt = `A cosmic, ethereal masterpiece representing the zodiac sign ${zodiac}, digital art, 8k, cinematic lighting, astrology theme`
+  // 2. 构造 Prompt
+  const prompt = `A cosmic, ethereal digital art representation of the zodiac sign ${zodiac}, cinematic lighting, futuristic 2029 theme, 8k resolution, intricate details.`
 
-  const serverUrl = process.env.ORACLE_SERVER_URL || 'http://localhost:5001/api/oracle'
-
-  try {
-    const response = await fetch(serverUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt, type })
-    })
-    
-    const data = await response.json()
-    return data
-  } catch (error) {
-    console.error('Error calling oracle server:', error)
+  // 3. 直接在 Server API 中调用 Replicate (Cloud Execution)
+  const REPLICATE_API_TOKEN = process.env.REPLICATE_API_TOKEN
+  
+  if (!REPLICATE_API_TOKEN) {
     throw createError({
       statusCode: 500,
-      statusMessage: 'Internal Server Error',
+      statusMessage: 'Server configuration error: Missing API Token',
+    })
+  }
+  
+  try {
+    let output;
+    if (type === 'image') {
+      const response = await fetch("https://api.replicate.com/v1/models/prunaai/z-image-turbo/predictions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Token ${REPLICATE_API_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ input: { prompt } }),
+      });
+      
+      const prediction = await response.json();
+      
+      // 等待 Replicate 生成完成 (Turbo 模型通常非常快)
+      let result = prediction;
+      while (result.status !== "succeeded" && result.status !== "failed") {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        const pollResponse = await fetch(prediction.urls.get, {
+          headers: { "Authorization": `Token ${REPLICATE_API_TOKEN}` },
+        });
+        result = await pollResponse.json();
+      }
+      
+      if (result.status === "failed") throw new Error("Image generation failed");
+      output = result.output[0] || result.output;
+    }
+
+    return { url: output }
+  } catch (error: any) {
+    console.error('Replicate call failed:', error)
+    throw createError({
+      statusCode: 500,
+      statusMessage: error.message || 'Internal Server Error',
     })
   }
 })
